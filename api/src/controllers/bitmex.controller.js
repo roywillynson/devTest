@@ -3,12 +3,12 @@ const httpStatus = require('http-status');
 const { Announcement } = require('../models/announcement.model');
 
 exports.getAnnouncement = async (req, res) => {
-  // GET DATA FROM BIMEX
-  const announcements = await bitmexService.getAnnouncement();
+  // GET DATA FROM BITMEX
+  const announcementsFromBitmex = await bitmexService.getAnnouncement();
 
-  // STORE DATA FROM BIMEX
+  // STORE DATA FROM BITMEX
   Announcement.insertMany(
-    announcements.map(
+    announcementsFromBitmex.map(
       data =>
         new Announcement({
           content: data.content,
@@ -17,8 +17,11 @@ exports.getAnnouncement = async (req, res) => {
           link: data.link,
           title: data.title,
         })
-    )
+    ),
+    { ordered: true }
   );
+
+  const announcements = await Announcement.find({}).lean();
 
   res.status(httpStatus.OK).json({ data: announcements });
 };
